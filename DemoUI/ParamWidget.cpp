@@ -123,7 +123,7 @@ void ParamWidget::makePreset()
     if(presetName.isNull())
         return;
     Cornu::Parameters newParams = _parameters;
-    QByteArray name = presetName.toAscii();
+    QByteArray name = presetName.toLatin1();
     std::string nameString(name.constData(), name.length());
     newParams.setName(nameString);
     _addPreset(newParams);

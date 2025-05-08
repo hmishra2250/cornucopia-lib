@@ -1,37 +1,51 @@
-# CmakeLists.txt in DemoUI
+cmake_minimum_required(VERSION 3.5)
+project(DemoUI)
 
-FIND_PACKAGE(Qt4 REQUIRED)
-SET(QT_USE_QTSVG TRUE)
-SET(QT_USE_QTSCRIPT TRUE)
-INCLUDE(${QT_USE_FILE})
+# Enable automatic MOC, UIC, and RCC processing
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-INCLUDE_DIRECTORIES(${Cornucopia_SOURCE_DIR}/Cornucopia)
-INCLUDE_DIRECTORIES(${Cornucopia_SOURCE_DIR}/DemoUI)
+# Find necessary Qt5 components
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Svg Script)
 
-FILE(GLOB DemoUI_CPP "*.cpp")
-FILE(GLOB DemoUI_H "*.h")
-FILE(GLOB DemoUI_UI "*.ui")
+# Include project directories
+include_directories(
+    ${Cornucopia_SOURCE_DIR}/Cornucopia
+    ${Cornucopia_SOURCE_DIR}/DemoUI
+    ${CMAKE_CURRENT_BINARY_DIR}  # For moc output
+)
 
-QT4_WRAP_UI(DemoUI_H ${DemoUI_UI})
+# Gather source files
+file(GLOB DemoUI_CPP "*.cpp")
+file(GLOB DemoUI_H "*.h")
+file(GLOB DemoUI_UI "*.ui")
 
-LIST(APPEND DemoUI_Sources ${DemoUI_CPP} ${DemoUI_H})
+# Combine all sources
+set(DemoUI_Sources ${DemoUI_CPP} ${DemoUI_H} ${DemoUI_UI})
 
-QT4_AUTOMOC(${DemoUI_Sources})
+# Add executable target
+add_executable(DemoUI ${DemoUI_Sources})
 
-#This is for moc files
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+# Link required libraries
+target_link_libraries(DemoUI
+    Cornucopia
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Svg
+    Qt5::Script
+)
 
-ADD_EXECUTABLE(DemoUI ${DemoUI_Sources})
+# Install binary
+install(TARGETS DemoUI RUNTIME DESTINATION bin)
 
-TARGET_LINK_LIBRARIES(DemoUI Cornucopia ${QT_LIBRARIES})
-
-INSTALL( TARGETS DemoUI RUNTIME DESTINATION bin )
-
-IF(WIN32)
-    INSTALL(FILES
-        "${QT_BINARY_DIR}/QtCore${QT_VERSION_MAJOR}.dll"
-        "${QT_BINARY_DIR}/QtGui${QT_VERSION_MAJOR}.dll"
-        "${QT_BINARY_DIR}/QtScript${QT_VERSION_MAJOR}.dll"
+# Windows-specific Qt DLL installation
+if(WIN32)
+    install(FILES
+        "${QT_BINARY_DIR}/Qt5Core.dll"
+        "${QT_BINARY_DIR}/Qt5Gui.dll"
+        "${QT_BINARY_DIR}/Qt5Script.dll"
         DESTINATION bin
     )
-ENDIF(WIN32)
+endif()

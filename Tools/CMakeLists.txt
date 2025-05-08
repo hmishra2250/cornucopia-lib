@@ -1,29 +1,40 @@
-# CmakeLists.txt in Tools
+cmake_minimum_required(VERSION 3.5)
+project(CornucopiaTools)
 
-FIND_PACKAGE(Qt4 REQUIRED)
-SET(QT_USE_QTSVG TRUE)
-INCLUDE(${QT_USE_FILE})
+# Enable Qt5 automatic handling of MOC, UIC, and RCC
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-FILE(GLOB Tools_CPP "*.cpp")
-FILE(GLOB Tools_H "*.h")
-FILE(GLOB Tools_UI "*.ui")
+# Find required Qt5 components
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Svg)
 
-QT4_WRAP_UI(Tools_H ${Tools_UI})
+# Gather source files
+file(GLOB Tools_CPP "*.cpp")
+file(GLOB Tools_H "*.h")
+file(GLOB Tools_UI "*.ui")
 
-LIST(APPEND Tools_Sources ${Tools_CPP} ${Tools_H})
+# Combine source files
+set(Tools_Sources ${Tools_CPP} ${Tools_H} ${Tools_UI})
 
-QT4_AUTOMOC(${Tools_Sources})
+# Include directories
+include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}      # for MOC
+    ${CMAKE_BINARY_DIR}              # for config.h
+    ${Cornucopia_SOURCE_DIR}/Cornucopia
+)
 
-#This is for moc files
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+# Add executable target
+add_executable(CornucopiaTools ${Tools_Sources})
 
-#And this is for config.h
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+# Link Qt5 libraries and your own
+target_link_libraries(CornucopiaTools
+    Cornucopia
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Svg
+)
 
-INCLUDE_DIRECTORIES(${Cornucopia_SOURCE_DIR}/Cornucopia)
-
-ADD_EXECUTABLE(CornucopiaTools ${Tools_Sources})
-
-TARGET_LINK_LIBRARIES(CornucopiaTools Cornucopia ${QT_LIBRARIES})
-
-CONFIGURE_FILE(config.h.cmake config.h )
+# Generate config.h from config.h.cmake
+configure_file(config.h.cmake config.h)
